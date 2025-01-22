@@ -89,8 +89,7 @@ define('forum/account/settings', [
 			if (newSettings.hasOwnProperty(key)) {
 				if (key === 'userLang') {
 					languageChanged = checkLanguageChange(newSettings.userLang);
-				}
-				else if (key === 'bootswatchSkin') {
+				} else if (key === 'bootswatchSkin') {
 					updateBootswatchSkin(newSettings.bootswatchSkin);
 				} else {
 					updateConfigKey(key, newSettings[key]);
