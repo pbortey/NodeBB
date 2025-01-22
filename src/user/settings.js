@@ -96,7 +96,9 @@ module.exports = function (User) {
 		return defaultValue;
 	}
 
+	console.log('HIII 1');
 	User.saveSettings = async function (uid, data) {
+		console.log('HIII 3');
 		const maxPostsPerPage = meta.config.maxPostsPerPage || 20;
 		if (
 			!data.postsPerPage ||

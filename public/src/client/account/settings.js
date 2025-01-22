@@ -71,29 +71,62 @@ define('forum/account/settings', [
 		return settings;
 	}
 
+	// simplifying the function by breaking it down into multiple helper functions
 	function saveSettings(settings) {
+		console.log('HIII 2');
 		api.put(`/users/${ajaxify.data.uid}/settings`, { settings }).then((newSettings) => {
 			alerts.success('[[success:settings-saved]]');
-			let languageChanged = false;
-			for (const key in newSettings) {
-				if (newSettings.hasOwnProperty(key)) {
-					if (key === 'userLang' && config.userLang !== newSettings.userLang) {
-						languageChanged = true;
-					}
-					if (key === 'bootswatchSkin') {
-						savedSkin = newSettings.bootswatchSkin;
-						config.bootswatchSkin = savedSkin === 'noskin' ? '' : savedSkin;
-					} else if (config.hasOwnProperty(key)) {
-						config[key] = newSettings[key];
-					}
-				}
-			}
-
-			if (languageChanged && parseInt(app.user.uid, 10) === parseInt(ajaxify.data.theirid, 10)) {
+			const languageChanged = updateConfig(newSettings);
+			if (languageChanged && isSameUser(app.user.uid, ajaxify.data.uid)) {
 				window.location.reload();
 			}
 		});
 	}
+
+	function updateConfig(newSettings) {
+		let languageChanged = false;
+		for (const key in newSettings) {
+			if (newSettings.hasOwnProperty(key)) {
+				if (key === 'userLang') {
+					languageChanged = checkLanguageChange(newSettings.userLang);
+				}
+				else if (key === 'bootswatchSkin') {
+					updateBootswatchSkin(newSettings.bootswatchSkin);
+				} else {
+					updateConfigKey(key, newSettings[key]);
+				}
+			}
+		}
+		return languageChanged;
+	}
+
+	// checks if the language has changed
+	function checkLanguageChange(newUserLang) {
+		const languageChanged = config.userLang !== newUserLang;
+		if (languageChanged) {
+			config.userLang = newUserLang;
+		}
+		return languageChanged;
+	}
+
+	// update the bootswatch skin
+	// genAI was used to understand bootswatchskin
+	function updateBootswatchSkin(skin) {
+		savedSkin = skin;
+		config.bootswatchSkin = skin === 'noskin' ? '' : skin;
+	}
+
+	function updateConfigKey(key, value) {
+		if (config.hasOwnProperty(key)) {
+			config[key] = value;
+		}
+	}
+
+	// checks if the current user is the same as the target user
+	function isSameUser(currentUid, targetUid) {
+		return parseInt(currentUid, 10) === parseInt(targetUid, 10);
+	}
+
 
 	function toggleCustomRoute() {
 		if ($('[data-property="homePageRoute"]').val() === 'custom') {
